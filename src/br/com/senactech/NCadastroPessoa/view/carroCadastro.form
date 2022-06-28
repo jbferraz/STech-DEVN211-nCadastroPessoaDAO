@@ -410,10 +410,12 @@
         </Component>
         <Component class="javax.swing.JTextField" name="jtfCPFProp">
           <Properties>
-            <Property name="toolTipText" type="java.lang.String" value="Informe o CPF"/>
+            <Property name="toolTipText" type="java.lang.String" value="Informe o CPF somente com n&#xfa;meros"/>
           </Properties>
           <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jtfCPFPropFocusGained"/>
             <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jtfCPFPropFocusLost"/>
+            <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="jtfCPFPropKeyTyped"/>
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="jlNomeProp">

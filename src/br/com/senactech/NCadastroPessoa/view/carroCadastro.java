@@ -11,6 +11,7 @@ import br.com.senactech.NCadastroPessoa.services.CarroServicos;
 import br.com.senactech.NCadastroPessoa.services.PessoaServicos;
 import br.com.senactech.NCadastroPessoa.services.ServicosFactory;
 import br.com.senactech.NCadastroPessoa.util.ValidaCPF;
+import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -43,7 +44,7 @@ public class carroCadastro extends javax.swing.JFrame {
 //        cadCarros.mokCarro();
         addRowToTableBD();
     }
-    
+
     public void addRowToTableBD() {
         try {
             //Cria obj model e recebe a modelagem da tabela JtPessoa do JFrame
@@ -57,26 +58,26 @@ public class carroCadastro extends javax.swing.JFrame {
                 rowData[0] = c.getPlaca();
                 rowData[1] = c.getMarca();
                 rowData[2] = c.getModelo();
-                
+
                 //ref: mkyong.com/java8/java-8-predicate-examples
                 //Aplicar filtro na lista de Pessoas pelo idPessoa
                 //Predicate a partir do Java 8
                 Predicate<Pessoa> byId = pessoa -> pessoa.getIdPessoa() == c.getIdPessoa();
                 var result = pessoaS.getPessoas().stream().filter(byId).collect(Collectors.toList());
-                
+
                 //Lambda a partir do Java 8
-                //List<Pessoa> result2 = pessoaS.getPessoas().stream().filter(p -> p.getIdPessoa() == c.getIdPessoa()).collect(Collectors.toList());
+                //List<Pessoa> result2 = pessoaS.getPessoas().stream().filter(p -> p.getIdPessoa() 
+                //  == c.getIdPessoa()).collect(Collectors.toList());
                 //System.out.println(result2.get(0).getNomePessoa());
-                
                 rowData[3] = result.get(0).getNomePessoa();
-                
+
                 model.addRow(rowData);
             }
         } catch (SQLException ex) {
             Logger.getLogger(carroCadastro.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public void jTableFilterClear() {
         DefaultTableModel model = (DefaultTableModel) jtCarros.getModel();
         final TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(model);
@@ -262,10 +263,18 @@ public class carroCadastro extends javax.swing.JFrame {
 
         jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Selecione...", "Mercedes", "GM", "Peugeot", "Jeep", "Fiat", "Mitsubishi", "Lincoln", "Land Rover", "Jaguard" }));
 
-        jtfCPFProp.setToolTipText("Informe o CPF");
+        jtfCPFProp.setToolTipText("Informe o CPF somente com números");
         jtfCPFProp.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtfCPFPropFocusGained(evt);
+            }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 jtfCPFPropFocusLost(evt);
+            }
+        });
+        jtfCPFProp.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtfCPFPropKeyTyped(evt);
             }
         });
 
@@ -461,15 +470,17 @@ public class carroCadastro extends javax.swing.JFrame {
     private void jtfCPFPropFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtfCPFPropFocusLost
         try {
             // TODO add your handling code here:
-            PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
-            if (!ValidaCPF.isCPF(jtfCPFProp.getText())) {
-                JOptionPane.showMessageDialog(this,
-                        "CPF informado esta incorreto!!!",
-                        ".: Erro :.", JOptionPane.ERROR_MESSAGE);
-                jtfCPFProp.requestFocus();
-            } else if (!pessoaS.verCpfBD(jtfCPFProp.getText())) {
-                int id = pessoaS.buscarPessoa(jtfCPFProp.getText()).getIdPessoa();
-                jlNomeProp.setText(pessoaS.buscarPessoa(jtfCPFProp.getText()).getNomePessoa());
+            if (!jtfCPFProp.getText().isBlank()) {
+                PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
+                if (!ValidaCPF.isCPF(jtfCPFProp.getText())) {
+                    JOptionPane.showMessageDialog(this,
+                            "CPF informado esta incorreto!!!",
+                            ".: Erro :.", JOptionPane.ERROR_MESSAGE);
+                    jtfCPFProp.requestFocus();
+                } else if (!pessoaS.verCpfBD(jtfCPFProp.getText())) {
+                    int id = pessoaS.buscarPessoa(jtfCPFProp.getText()).getIdPessoa();
+                    jlNomeProp.setText(pessoaS.buscarPessoa(jtfCPFProp.getText()).getNomePessoa());
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(carroCadastro.class.getName()).log(Level.SEVERE, null, ex);
@@ -484,7 +495,7 @@ public class carroCadastro extends javax.swing.JFrame {
             verPlaca = (placa.length() == 7 && !carroS.verPlacaBD(placa));
             if (!verPlaca) {
                 String msg = "Placa já cadastrada ou incorreta!";
-                JOptionPane.showMessageDialog(this, msg,".: Erro :.",
+                JOptionPane.showMessageDialog(this, msg, ".: Erro :.",
                         JOptionPane.ERROR_MESSAGE);
                 jtfPlaca.requestFocus();
                 return false;
@@ -494,7 +505,7 @@ public class carroCadastro extends javax.swing.JFrame {
             int anoF = Integer.parseInt(jtfAnoF.getText());
             if (anoF > anoAtual) {
                 String msg = "Ano fabricação inválido!";
-                JOptionPane.showMessageDialog(this, msg,".: Erro :.",
+                JOptionPane.showMessageDialog(this, msg, ".: Erro :.",
                         JOptionPane.ERROR_MESSAGE);
                 jtfAnoF.requestFocus();
                 return false;
@@ -504,14 +515,14 @@ public class carroCadastro extends javax.swing.JFrame {
             testaAnoMod = cadCarros.verAnoMod(anoF, anoMod);
             if (!testaAnoMod) {
                 String msg = "Ano modelo inválido!";
-                JOptionPane.showMessageDialog(this, msg,".: Erro :.",
+                JOptionPane.showMessageDialog(this, msg, ".: Erro :.",
                         JOptionPane.ERROR_MESSAGE);
                 jtfAnoM.requestFocus();
                 return false;
             }
-            if (jcbMarca.getSelectedItem().equals("Selecione...")){
+            if (jcbMarca.getSelectedItem().equals("Selecione...")) {
                 String msg = "Selecione um marca!";
-                JOptionPane.showMessageDialog(this, msg,".: Erro :.",
+                JOptionPane.showMessageDialog(this, msg, ".: Erro :.",
                         JOptionPane.ERROR_MESSAGE);
                 jcbMarca.requestFocus();
                 return false;
@@ -526,7 +537,7 @@ public class carroCadastro extends javax.swing.JFrame {
         // TODO add your handling code here:
         PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
         CarroServicos carroS = ServicosFactory.getCarroServicos();
-        if (validaInputs()){
+        if (validaInputs()) {
             try {
                 int id = cadCarros.gerarId();
                 int idPessoa = pessoaS.buscarPessoa(jtfCPFProp.getText()).getIdPessoa();
@@ -537,14 +548,14 @@ public class carroCadastro extends javax.swing.JFrame {
                 int anoM = Integer.parseInt(jtfAnoM.getText());
                 String cor = jtfCor.getText();
                 int portas = Integer.parseInt(jtfPortas.getText());
-                
+
                 Carro c = new Carro(id, placa, marca, modelo, anoF, anoM, cor,
                         portas, idPessoa);
                 carroS.cadCarro(c);
                 //cadCarros.add(c);
-                
+
                 addRowToTableBD();
-                
+
                 JOptionPane.showMessageDialog(this, "Carro foi salvo com sucesso!");
                 jbLimpar.doClick();
             } catch (SQLException ex) {
@@ -562,26 +573,34 @@ public class carroCadastro extends javax.swing.JFrame {
 
     private void jbDeletarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbDeletarActionPerformed
         // TODO add your handling code here:
-        jbEditar.setEnabled(false);
-        int linha;
-        String placa;
-        linha = jtCarros.getSelectedRow();
-        placa = (String) jtCarros.getValueAt(linha, 0);
-        
-        Carro c = cadCarros.getByDoc(placa);
-        
-        Object[] resp = {"Sim", "Não"};
-        int resposta = JOptionPane.showOptionDialog(this,
-                "Deseja realmente deletar " + c.getPlaca() + "?",
-                ".: Deletar :.", JOptionPane.DEFAULT_OPTION,
-                JOptionPane.WARNING_MESSAGE, null, resp, resp[0]);
-        if (resposta == 0) {
-            cadCarros.deletar(c);
-            addRowToTableBD();
-            JOptionPane.showMessageDialog(this, "Carro deletado com sucesso!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Entendemos sua decisão!",
-                    ".: Deletar :.", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            jbEditar.setEnabled(false);
+            int linha;
+            String placa;
+            linha = jtCarros.getSelectedRow();
+            placa = (String) jtCarros.getValueAt(linha, 0);
+            CarroServicos carroS = ServicosFactory.getCarroServicos();
+            Carro c = carroS.buscarCarro(placa);
+
+            Object[] resp = {"Sim", "Não"};
+            int resposta = JOptionPane.showOptionDialog(this,
+                    "Deseja realmente deletar " + c.getPlaca() + "?",
+                    ".: Deletar :.", JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.WARNING_MESSAGE, null, resp, resp[0]);
+            if (resposta == 0) {
+
+                //cadCarros.deletar(c);
+                carroS.deletarCarroBD(c.getIdCarro());
+
+                addRowToTableBD();
+                JOptionPane.showMessageDialog(this, "Carro deletado com sucesso!");
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Entendemos sua decisão!",
+                        ".: Deletar :.", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(carroCadastro.class.getName()).log(Level.SEVERE, null, ex);
         }
         jbLimpar.doClick();
     }//GEN-LAST:event_jbDeletarActionPerformed
@@ -596,14 +615,15 @@ public class carroCadastro extends javax.swing.JFrame {
             jtfPlaca.setEnabled(false);
             jbConfirmar.setEnabled(true);
             jbLimpar.setText("Cancelar");
-            
+
             int linha = jtCarros.getSelectedRow();
             String placa = (String) jtCarros.getValueAt(linha, 0);
             CarroServicos carroS = ServicosFactory.getCarroServicos();
             Carro c = carroS.buscarCarro(placa);
             PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
-            List<Pessoa> pessoa = pessoaS.getPessoas().stream().filter(p -> p.getIdPessoa() == c.getIdPessoa()).collect(Collectors.toList());
-            
+            List<Pessoa> pessoa = pessoaS.getPessoas().stream().filter(p -> p.getIdPessoa()
+                    == c.getIdPessoa()).collect(Collectors.toList());
+
             jtfPlaca.setText(c.getPlaca());
             jtfModelo.setText(c.getModelo());
             jtfAnoF.setText(Integer.toString(c.getAnoFabricacao()));
@@ -620,12 +640,12 @@ public class carroCadastro extends javax.swing.JFrame {
 
     private void jbConfirmarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbConfirmarActionPerformed
         // TODO add your handling code here:
-        if (validaInputs()){
+        if (validaInputs()) {
             try {
                 PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
                 CarroServicos carroS = ServicosFactory.getCarroServicos();
                 Carro c = carroS.buscarCarro(jtfPlaca.getText());
-                
+
                 c.setAnoFabricacao(Integer.parseInt(jtfAnoF.getText()));
                 c.setAnoModelo(Integer.parseInt(jtfAnoM.getText()));
                 c.setCor(jtfCor.getText());
@@ -633,13 +653,13 @@ public class carroCadastro extends javax.swing.JFrame {
                 c.setModelo(jtfModelo.getText());
                 c.setnPortas(Integer.parseInt(jtfPortas.getText()));
                 c.setIdPessoa(pessoaS.buscarPessoa(jtfCPFProp.getText()).getIdPessoa());
-                
+
                 carroS.atualizarCarroBD(c);
                 addRowToTableBD();
-                
+
                 jbLimpar.doClick();
                 jbLimpar.setText("Limpar");
-                
+
                 JOptionPane.showMessageDialog(this, "Carro atualizado com sucesso!!!");
             } catch (SQLException ex) {
                 Logger.getLogger(carroCadastro.class.getName()).log(Level.SEVERE, null, ex);
@@ -670,6 +690,23 @@ public class carroCadastro extends javax.swing.JFrame {
             Logger.getLogger(pessoaCadastro.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jbPesqActionPerformed
+
+    private void jtfCPFPropFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtfCPFPropFocusGained
+        // TODO add your handling code here:
+        jlNomeProp.setText("Tecle Tab para ver proprietário!");
+    }//GEN-LAST:event_jtfCPFPropFocusGained
+
+    private void jtfCPFPropKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtfCPFPropKeyTyped
+        // TODO add your handling code here:
+        String caracteres = "0987654321";
+        if (evt.getKeyChar() == java.awt.event.KeyEvent.VK_BACK_SPACE){
+            evt.consume();
+        }else if (!caracteres.contains(evt.getKeyChar() + "")) {
+            JOptionPane.showMessageDialog(rootPane, "Informe CPF somente com números.");
+            evt.consume();
+        }
+
+    }//GEN-LAST:event_jtfCPFPropKeyTyped
 
     /**
      * @param args the command line arguments
