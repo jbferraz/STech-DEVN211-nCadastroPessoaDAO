@@ -490,7 +490,7 @@ public class pessoaCadastro extends javax.swing.JFrame {
 
         if (validaInputs()) {
             try {
-                int id = cadPessoas.gerarId();
+                int id = 0;
                 String nomePessoa = jtfNome.getText();
                 String cpf = jtfCPF.getText();
                 String endereco = jtfEndereco.getText();

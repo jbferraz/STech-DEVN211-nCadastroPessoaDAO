@@ -699,7 +699,8 @@ public class carroCadastro extends javax.swing.JFrame {
     private void jtfCPFPropKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtfCPFPropKeyTyped
         // TODO add your handling code here:
         String caracteres = "0987654321";
-        if (evt.getKeyChar() == java.awt.event.KeyEvent.VK_BACK_SPACE){
+        if (evt.getKeyChar() == java.awt.event.KeyEvent.VK_BACK_SPACE ||
+                evt.getKeyChar() == java.awt.event.KeyEvent.VK_DELETE){
             evt.consume();
         }else if (!caracteres.contains(evt.getKeyChar() + "")) {
             JOptionPane.showMessageDialog(rootPane, "Informe CPF somente com números.");
